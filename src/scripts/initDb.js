@@ -25,23 +25,44 @@ const initDb = async () => {
     await connection.query(`USE \`${MYSQL_DATABASE || 'authdb'}\`;`);
 
     // Create users table
+    await connection.query('DROP TABLE IF EXISTS `auth_events`;');
+    await connection.query('DROP TABLE IF EXISTS `users`;');
+
     const createUsersTableQuery = `
-      CREATE TABLE IF NOT EXISTS \`users\` (
+      CREATE TABLE \`users\` (
         \`uid\` varchar(255) NOT NULL,
         \`email\` varchar(255) NOT NULL,
         \`name\` varchar(255) NOT NULL,
-        \`roles\` json NOT NULL,
-        \`company_id\` char(36) DEFAULT NULL,
-        \`unit_id\` char(36) DEFAULT NULL,
+        \`last_system_used\` varchar(255) DEFAULT NULL,
+        \`login_count\` int DEFAULT 0,
+        \`last_ip\` varchar(45) DEFAULT NULL,
+        \`last_device\` text DEFAULT NULL,
+        \`last_location\` text DEFAULT NULL,
         \`created_at\` datetime DEFAULT CURRENT_TIMESTAMP,
         \`status\` enum('active','inactive') DEFAULT 'active',
-        PRIMARY KEY (\`uid\`),
-        KEY \`fk_user_company\` (\`company_id\`),
-        KEY \`fk_user_unit\` (\`unit_id\`)
+        PRIMARY KEY (\`uid\`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     `;
     await connection.query(createUsersTableQuery);
     console.log('Table `users` created or already exists.');
+
+    const createAuthEventsTableQuery = `
+      CREATE TABLE \`auth_events\` (
+        \`id\` int NOT NULL AUTO_INCREMENT,
+        \`uid\` varchar(255) NOT NULL,
+        \`event_type\` varchar(50) NOT NULL,
+        \`system\` varchar(255) DEFAULT NULL,
+        \`ip_address\` varchar(45) DEFAULT NULL,
+        \`device_info\` text DEFAULT NULL,
+        \`location\` text DEFAULT NULL,
+        \`created_at\` datetime DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (\`id\`),
+        KEY \`fk_auth_events_user\` (\`uid\`),
+        CONSTRAINT \`fk_auth_events_user\` FOREIGN KEY (\`uid\`) REFERENCES \`users\` (\`uid\`) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    `;
+    await connection.query(createAuthEventsTableQuery);
+    console.log('Table `auth_events` created or already exists.');
 
     console.log('Auth-service database initialization completed successfully!');
     await connection.end();
