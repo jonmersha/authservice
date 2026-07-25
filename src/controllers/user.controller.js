@@ -49,7 +49,7 @@ export const createUser = async (req, res) => {
 
     // Insert an auth event log
     await pool.query(
-      `INSERT INTO auth_events (uid, event_type, system, ip_address, device_info, location) 
+      `INSERT INTO auth_events (uid, event_type, \`system\`, ip_address, device_info, location) 
        VALUES (?, ?, ?, ?, ?, ?)`,
       [uid, 'login_sync', lastSystemUsed, ipAddress, deviceInfo, finalLocation]
     );
