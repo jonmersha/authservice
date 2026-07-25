@@ -41,7 +41,7 @@ const initDb = async () => {
         \`created_at\` datetime DEFAULT CURRENT_TIMESTAMP,
         \`status\` enum('active','inactive') DEFAULT 'active',
         PRIMARY KEY (\`uid\`)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+      );
     `;
     await connection.query(createUsersTableQuery);
     console.log('Table `users` created or already exists.');
@@ -59,7 +59,7 @@ const initDb = async () => {
         PRIMARY KEY (\`id\`),
         KEY \`fk_auth_events_user\` (\`uid\`),
         CONSTRAINT \`fk_auth_events_user\` FOREIGN KEY (\`uid\`) REFERENCES \`users\` (\`uid\`) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+      ) ;
     `;
     await connection.query(createAuthEventsTableQuery);
     console.log('Table `auth_events` created or already exists.');
