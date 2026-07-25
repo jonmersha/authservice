@@ -10,14 +10,17 @@ import userRoutes from './src/routes/user.routes.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 4001;
 
 // Trust proxy if we are behind a reverse proxy (e.g., Nginx, Heroku, etc.)
 // Needed for correct IP tracking in rate limit and database
 app.set('trust proxy', 1);
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Apply rate limiting to all API requests
@@ -42,6 +45,6 @@ app.use('/api', authenticateToken);
 // Mount routes
 app.use('/api/users', userRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Auth service running on port ${PORT}`);
+app.listen(() => {
+  console.log(`Auth service running`);
 });
