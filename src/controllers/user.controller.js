@@ -1,4 +1,5 @@
 import pool from '../config/db.config.js';
+import jwt from 'jsonwebtoken';
 
 export const getUsers = async (req, res) => {
   try {
@@ -53,7 +54,15 @@ export const createUser = async (req, res) => {
       [uid, 'login_sync', lastSystemUsed, ipAddress, deviceInfo, finalLocation]
     );
 
-    res.status(201).json({ uid });
+    // Generate Custom JWT Token
+    const jwtSecret = process.env.JWT_SECRET || 'fallback_dev_secret_key';
+    const customToken = jwt.sign(
+      { uid, email, name, status: finalStatus },
+      jwtSecret,
+      { expiresIn: '24h' }
+    );
+
+    res.status(201).json({ uid, token: customToken });
   } catch (error) {
     console.error('Create user error:', error);
     res.status(500).json({ error: 'Failed to create user', details: error.message, sqlMessage: error.sqlMessage, stack: error.stack });

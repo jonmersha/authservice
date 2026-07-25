@@ -1,6 +1,6 @@
 import { getAuth } from 'firebase-admin/auth';
 import { initializeApp } from 'firebase-admin/app';
-import pool from '../config/db.config.js';
+import jwt from 'jsonwebtoken';
 
 // Initialize Firebase Admin with just the projectId (sufficient for verifying ID tokens)
 initializeApp({
@@ -15,26 +15,27 @@ export const authenticateToken = async (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
   
+  // Try Custom JWT first
   try {
-    const decodedToken = await getAuth().verifyIdToken(token);
-    
-    // Attach user to req
+    const jwtSecret = process.env.JWT_SECRET || 'fallback_dev_secret_key';
+    const decodedCustom = jwt.verify(token, jwtSecret);
     req.user = {
-      uid: decodedToken.uid,
-      email: decodedToken.email
+      uid: decodedCustom.uid,
+      email: decodedCustom.email
     };
-    
-    // Add company_id from database if user exists
+    return next();
+  } catch (jwtError) {
+    // If it's not a valid custom JWT, it might be a Firebase token
     try {
-      const [rows] = await pool.query('SELECT company_id FROM users WHERE uid = ?', [decodedToken.uid]);
-      req.user.company_id = rows.length > 0 ? rows[0].company_id : null;
-    } catch (dbError) {
-      req.user.company_id = null;
+      const decodedToken = await getAuth().verifyIdToken(token);
+      req.user = {
+        uid: decodedToken.uid,
+        email: decodedToken.email
+      };
+      return next();
+    } catch (firebaseError) {
+      console.error('Auth Error: Token invalid for both Custom JWT and Firebase');
+      return res.status(401).json({ error: 'Unauthorized: Invalid token' });
     }
-
-    next();
-  } catch (error) {
-    console.error('Firebase Auth Error:', error);
-    return res.status(401).json({ error: 'Unauthorized: Invalid token' });
   }
 };
