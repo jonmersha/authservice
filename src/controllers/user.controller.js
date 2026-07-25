@@ -59,7 +59,7 @@ export const createUser = async (req, res) => {
     const customToken = jwt.sign(
       { uid, email, name, status: finalStatus },
       jwtSecret,
-      { expiresIn: '24h' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 
     res.status(201).json({ uid, token: customToken });
