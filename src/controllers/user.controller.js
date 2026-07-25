@@ -31,12 +31,12 @@ export const createUser = async (req, res) => {
     const { name, status, system, location } = req.body;
     const finalStatus = status || 'active';
     const lastSystemUsed = system || 'unknown';
-    
+
     // Capture metadata
     const ipAddress = req.ip || req.socket?.remoteAddress || 'unknown';
     const deviceInfo = req.headers['user-agent'] || 'unknown';
     const finalLocation = location || null;
-    
+
     await pool.query(
       `INSERT INTO users (uid, email, name, status, last_system_used, login_count, last_ip, last_device, last_location) 
        VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?) 
@@ -73,21 +73,21 @@ export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { email, name, status, system, location } = req.body;
-    
+
     // Fetch current user to fallback for missing fields
     const [existing] = await pool.query('SELECT uid, email, name, status, last_system_used, login_count, last_ip, last_device, last_location FROM users WHERE uid = ?', [id]);
     if (existing.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     const currentUser = existing[0];
-    
+
     const finalEmail = email !== undefined ? email : currentUser.email;
     const finalName = name !== undefined ? name : currentUser.name;
     const finalStatus = status !== undefined ? status : currentUser.status;
     const finalSystem = system !== undefined ? system : currentUser.last_system_used;
     const finalLocation = location !== undefined ? location : currentUser.last_location;
-    
+
     await pool.query(
       'UPDATE users SET email = ?, name = ?, status = ?, last_system_used = ?, last_location = ? WHERE uid = ?',
       [finalEmail, finalName, finalStatus, finalSystem, finalLocation, id]
@@ -109,3 +109,5 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete user' });
   }
 };
+
+

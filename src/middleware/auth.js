@@ -14,7 +14,7 @@ export const authenticateToken = async (req, res, next) => {
   }
 
   const token = authHeader.split(' ')[1];
-  
+
   // Try Custom JWT first
   try {
     const jwtSecret = process.env.JWT_SECRET || 'fallback_dev_secret_key';
@@ -39,3 +39,5 @@ export const authenticateToken = async (req, res, next) => {
     }
   }
 };
+
+
