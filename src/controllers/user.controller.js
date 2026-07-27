@@ -64,7 +64,7 @@ export const createUser = async (req, res) => {
 
     // Forward the sync event to the main ERP Backend
     try {
-      const erpBackendUrl = process.env.ERP_BACKEND_URL || 'http://localhost:4000/api/erp-users';
+      const erpBackendUrl = process.env.ERP_BACKEND_URL || 'https://milkitest.besheger.com/api/erp-users';
       
       // We pass along the original authorization header (the Firebase JWT)
       const authHeader = req.headers['authorization'];
