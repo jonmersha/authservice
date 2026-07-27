@@ -46,6 +46,6 @@ app.use('/api', authenticateToken);
 app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 4001;
-app.listen(PORT, () => {
+app.listen(() => {
   console.log(`Auth service running on port ${PORT}`);
 });
