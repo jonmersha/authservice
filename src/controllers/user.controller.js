@@ -1,5 +1,6 @@
 import pool from '../config/db.config.js';
 import jwt from 'jsonwebtoken';
+import { ERP_BACKEND_URL } from '../config/urls.js';
 
 export const getUsers = async (req, res) => {
   try {
