@@ -62,6 +62,34 @@ export const createUser = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 
+    // Forward the sync event to the main ERP Backend
+    try {
+      const erpBackendUrl = process.env.ERP_BACKEND_URL || 'http://localhost:4000/api/erp-users';
+      
+      // We pass along the original authorization header (the Firebase JWT)
+      const authHeader = req.headers['authorization'];
+      
+      await fetch(erpBackendUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authHeader
+        },
+        body: JSON.stringify({
+          email: email,
+          name: name,
+          status: finalStatus,
+          system: lastSystemUsed,
+          location: finalLocation
+        })
+      });
+      console.log('Successfully forwarded auth event to ERP backend.');
+    } catch (erpError) {
+      console.error('Failed to forward auth event to ERP backend:', erpError);
+      // We don't fail the auth-service response if the ERP backend sync fails,
+      // as they might just be running the auth-service in isolation.
+    }
+
     res.status(201).json({ uid, token: customToken });
   } catch (error) {
     console.error('Create user error:', error);

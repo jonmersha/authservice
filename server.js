@@ -45,6 +45,7 @@ app.use('/api', authenticateToken);
 // Mount routes
 app.use('/api/users', userRoutes);
 
-app.listen(() => {
-  console.log(`Auth service running`);
+const PORT = process.env.PORT || 4001;
+app.listen(PORT, () => {
+  console.log(`Auth service running on port ${PORT}`);
 });
