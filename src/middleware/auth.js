@@ -1,11 +1,13 @@
 import { getAuth } from 'firebase-admin/auth';
-import { initializeApp } from 'firebase-admin/app';
+import { initializeApp, getApps } from 'firebase-admin/app';
 import jwt from 'jsonwebtoken';
 
 // Initialize Firebase Admin with just the projectId (sufficient for verifying ID tokens)
-initializeApp({
-  projectId: "sheger-systems",
-});
+if (!getApps().length) {
+  initializeApp({
+    projectId: "sheger-systems",
+  });
+}
 
 export const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
